@@ -30,9 +30,9 @@ export default function Topbar({ activeTab, setActiveTab }) {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`text-sm font-medium transition-colors ${activeTab === tab.id
-                  ? 'text-[#72D1B7] border-b-2 border-[#72D1B7]'
-                  : 'text-gray-600 hover:text-[#72D1B7]'
+              className={`text-base md:text-lg font-medium transition-colors ${activeTab === tab.id
+                ? 'text-[#72D1B7] border-b-2 border-[#72D1B7]'
+                : 'text-gray-600 hover:text-[#72D1B7]'
                 }`}
             >
               {tab.label}
@@ -46,7 +46,7 @@ export default function Topbar({ activeTab, setActiveTab }) {
             href="https://m.me/IceBlazeLAB"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:flex items-center gap-2 bg-[#72D1B7] hover:bg-[#5bb89e] text-white px-6 py-2.5 rounded-full text-sm font-bold transition shadow-sm"
+            className="hidden sm:flex items-center gap-2 bg-[#42CA88] hover:bg-[#3ebc7e] text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-md hover:shadow-lg transition-all"
           >
             <span>ติดต่อเรา</span>
           </a>
@@ -76,7 +76,7 @@ export default function Topbar({ activeTab, setActiveTab }) {
             <button
               key={tab.id}
               onClick={() => { setActiveTab(tab.id); setIsOpen(false); }}
-              className={`p-4 text-left rounded-xl font-bold transition-colors ${activeTab === tab.id ? 'bg-[#72D1B7]/10 text-[#72D1B7]' : 'text-gray-600 hover:bg-gray-50'}`}
+              className={`p-4 text-left rounded-xl text-lg font-bold transition-colors ${activeTab === tab.id ? 'bg-[#72D1B7]/10 text-[#72D1B7]' : 'text-gray-600 hover:bg-gray-50'}`}
             >
               {tab.label}
             </button>
@@ -87,7 +87,7 @@ export default function Topbar({ activeTab, setActiveTab }) {
             href="https://m.me/IceBlazeLAB"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 bg-[#72D1B7] hover:bg-[#5bb89e] text-white w-full py-3 rounded-xl text-sm font-bold transition shadow-sm"
+            className="flex items-center justify-center gap-2 bg-[#42CA88] hover:bg-[#3ebc7e] text-white w-full py-3 rounded-xl text-sm font-bold shadow-md hover:shadow-lg transition-all"
           >
             <span>ติดต่อสอบถาม</span>
           </a>
