@@ -5,21 +5,21 @@ export const MATERIALS = [
   { id: 'pla_3bees', name: 'PLA', density: 1.24, pricePerMin: 1.3, pricePerG: 2 },
   { id: 'petg_3bees', name: 'PETG', density: 1.29, pricePerMin: 1.25, pricePerG: 2 },
   { id: 'abs_3bees', name: 'ABS', density: 1.08, pricePerMin: 1.5, pricePerG: 3 },
-  { id: 'placf_barefoot', name: 'PLA-CF', density: 1.24, pricePerMin: 1.75, pricePerG: 3 },
-  { id: 'petgcf_barefoot', name: 'PETG-CF', density: 1.2, pricePerMin: 1.75, pricePerG: 3 },
+  { id: 'placf_barefoot', name: 'PLA-CF', density: 1.24, pricePerMin: 1.75, pricePerG: 3, hidden: true },
+  { id: 'petgcf_barefoot', name: 'PETG-CF', density: 1.2, pricePerMin: 1.75, pricePerG: 3, hidden: true },
   { id: 'htpla_polymaker', name: 'HT-PLA', density: 1.2, pricePerMin: 1.76, pricePerG: 3.2 },
   { id: 'absfr_sunlu', name: 'ABS-FR', density: 1.27, pricePerMin: 1.78, pricePerG: 3.4 },
   { id: 'pcpbt_threebees', name: 'PC-PBT', density: 1.24, pricePerMin: 1.78, pricePerG: 3.5 },
   { id: 'asa_polymaker', name: 'ASA', density: 1.27, pricePerMin: 1.8, pricePerG: 4 },
-  { id: 'tpu95a_3bees', name: 'TPU 95A', density: 1.1, pricePerMin: 1.85, pricePerG: 4 },
-  { id: 'pcabs_polymaker', name: 'PC-ABS', density: 1.1, pricePerMin: 4, pricePerG: 4 },
-  { id: 'petcf17_fiberon', name: 'PET-CF17', density: 1.34, pricePerMin: 4, pricePerG: 4 },
+  { id: 'tpu95a_3bees', name: 'TPU 95A', density: 1.1, pricePerMin: 1.85, pricePerG: 4, hidden: true },
+  { id: 'pcabs_polymaker', name: 'PC-ABS', density: 1.1, pricePerMin: 4, pricePerG: 4, hidden: true },
+  { id: 'petcf17_fiberon', name: 'PET-CF17', density: 1.34, pricePerMin: 4, pricePerG: 4, hidden: true },
   { id: 'pcpbtgf_polymaker', name: 'PC-PBT-GF', density: 1.04, pricePerMin: 4.5, pricePerG: 4.5 },
-  { id: 'copa_polymaker', name: 'CoPA', density: 1.12, pricePerMin: 4.5, pricePerG: 4.5 },
-  { id: 'pa6gf_polymaker', name: 'PA6-GF', density: 1.2, pricePerMin: 5.6, pricePerG: 5 },
-  { id: 'pa6cf_polymaker', name: 'PA6-CF', density: 1.17, pricePerMin: 8, pricePerG: 7 },
-  { id: 'pa12cf_polymaker', name: 'PA12-CF', density: 1.16, pricePerMin: 12.5, pricePerG: 9 },
-  { id: 'pa12cf_3dxtech', name: 'PA12-CF (3DXTech)', density: 1.16, pricePerMin: 15, pricePerG: 9 },
+  { id: 'copa_polymaker', name: 'CoPA', density: 1.12, pricePerMin: 4.5, pricePerG: 4.5, hidden: true },
+  { id: 'pa6gf_polymaker', name: 'PA6-GF', density: 1.2, pricePerMin: 5.6, pricePerG: 5, hidden: true },
+  { id: 'pa6cf_polymaker', name: 'PA6-CF', density: 1.17, pricePerMin: 8, pricePerG: 7, hidden: true },
+  { id: 'pa12cf_polymaker', name: 'PA12-CF', density: 1.16, pricePerMin: 12.5, pricePerG: 9, hidden: true },
+  { id: 'pa12cf_3dxtech', name: 'PA12-CF (3DXTech)', density: 1.16, pricePerMin: 15, pricePerG: 9, hidden: true },
 ];
 
 export const COLORS = [
@@ -193,7 +193,7 @@ export default function PricingConfigurator({
         <div>
           <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-1"><Layers className="w-4 h-4" />วัสดุ (Material)</label>
           <select className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-[#72D1B7] focus:border-[#72D1B7] p-2.5 bg-gray-50 border" value={activeMat} onChange={e => setActiveMat(e.target.value)}>
-            {MATERIALS.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+            {MATERIALS.filter(m => !m.hidden).map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
           </select>
         </div>
 

@@ -4,9 +4,11 @@ import { PhoneCall, Printer, Search, Menu, X } from 'lucide-react';
 export default function Topbar({ activeTab, setActiveTab }) {
   const tabs = [
     { id: 'Home', label: 'Home' },
+    { id: 'Portfolio', label: 'ผลงาน' },
     { id: 'Service', label: 'Service' },
     { id: 'Price', label: 'Price' },
     { id: 'Queue', label: 'Queue' },
+    { id: 'Articles', label: 'บทความ' },
     { id: 'About', label: 'About' },
   ];
 

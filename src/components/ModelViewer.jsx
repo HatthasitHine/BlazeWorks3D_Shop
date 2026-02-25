@@ -70,6 +70,9 @@ export default function ModelViewer({ fileUrl, fileExt, color, onVolumeCalculate
 
         const estimatedVolume = calculateRealVolume(geo);
 
+        // Fix Orientation: Rotate geometry by -90 degrees on the X-axis so it stands upright
+        geo.rotateX(-Math.PI / 2);
+
         geo.center();
         setGeometry(geo);
         setModelHeight(height);

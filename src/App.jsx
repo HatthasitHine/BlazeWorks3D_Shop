@@ -1,28 +1,30 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Cpu, Clock, ThumbsUp, Box, UploadCloud, Settings, Calculator, CheckCircle, Activity, Loader } from 'lucide-react';
 // Import Components ที่เราสร้างไว้
-import Topbar from './components/Topbar';
+import Topbar from './components/layout/Topbar';
 import ModelViewer from './components/ModelViewer';
 import PricingConfigurator from './components/PricingConfigurator';
 import FacebookChat from './components/FacebookChat';
-import Footer from './components/Footer';
+import Footer from './components/layout/Footer';
+import Portfolio from './pages/Portfolio';
+import Articles from './pages/Articles';
 
-import img1 from './Pic/1.jpg';
-import img2 from './Pic/2.jpg';
-import img3 from './Pic/3.jpg';
-import img4 from './Pic/4.jpg';
-import img5 from './Pic/5.jpg';
-import img6 from './Pic/6.jpg';
-import img7 from './Pic/7.jpg';
-import img8 from './Pic/8.jpg';
-import img9 from './Pic/17.jpg';
-import img10 from './Pic/15.jpg';
-import img11 from './Pic/19.jpg';
-import img12 from './Pic/10.jpg';
-import img13 from './Pic/11.jpg';
-import img14 from './Pic/20.jpg';
-import img15 from './Pic/18.jpg';
-import img16 from './Pic/16.jpg';
+import img1 from './assets/images/1.jpg';
+import img2 from './assets/images/2.jpg';
+import img3 from './assets/images/3.jpg';
+import img4 from './assets/images/4.jpg';
+import img5 from './assets/images/5.jpg';
+import img6 from './assets/images/6.jpg';
+import img7 from './assets/images/7.jpg';
+import img8 from './assets/images/8.jpg';
+import img9 from './assets/images/17.jpg';
+import img10 from './assets/images/15.jpg';
+import img11 from './assets/images/19.jpg';
+import img12 from './assets/images/10.jpg';
+import img13 from './assets/images/11.jpg';
+import img14 from './assets/images/20.jpg';
+import img15 from './assets/images/18.jpg';
+import img16 from './assets/images/16.jpg';
 
 // ค่าเริ่มต้น position คือ 'center' (ตรงกลาง)
 // ถ้าภาพถูกตัดขอบ สามารถแก้ position เป็น 'top', 'bottom', 'left', 'right'
@@ -192,7 +194,7 @@ function App() {
   const [fileName, setFileName] = useState('');
 
   const [volume, setVolume] = useState(0); // cm^3
-  const [material, setMaterial] = useState('pla');
+  const [material, setMaterial] = useState('petg');
   const [color, setColor] = useState('#1e90ff');
   const [scale, setScale] = useState(100);
   const [isConfiguratorOpen, setIsConfiguratorOpen] = useState(true);
@@ -289,18 +291,24 @@ function App() {
                 })}
               </div>
             </div>
-
             {/* Footer */}
             <Footer />
-
           </div>
+        )}
+
+        {activeTab === 'Portfolio' && (
+          <Portfolio />
+        )}
+
+        {activeTab === 'Articles' && (
+          <Articles />
         )}
 
         {activeTab === 'Service' && (
           <div className="min-h-[calc(100vh-80px)] w-full bg-gradient-to-br from-blue-100 via-white to-purple-100 relative z-10 flex flex-col justify-between">
             <div className="pt-16 pb-20 px-4 md:px-8 w-full flex flex-col items-center flex-1">
               <div className="w-full max-w-5xl">
-                <h1 className="text-4xl font-black text-gray-900 text-center mb-12">ขั้นตอนการใช้บริการ <span className="text-[#72D1B7]">ง่ายๆ ใน 4 สเตป</span></h1>
+                <h1 className="text-4xl font-black text-gray-900 text-center mb-12">ขั้นตอนการใช้บริการ <span className="text-[#72D1B7]">ง่ายๆ ใน 4 ขั้นตอน</span></h1>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
                   <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
@@ -322,7 +330,7 @@ function App() {
                       </div>
                       <h3 className="font-bold text-2xl text-gray-800">2. เลือกวัสดุและสี</h3>
                     </div>
-                    <p className="text-gray-500 text-lg relative z-10">เลือกประเภทพลาสติกที่เหมาะกับงาน (เช่น PLA, ABS, PETG) พร้อมปรับแต่งสีและขนาด (Scale) เพื่อตรงตามความต้องการที่สุด</p>
+                    <p className="text-gray-500 text-lg relative z-10">เลือกประเภทพลาสติกที่เหมาะกับงาน (เช่น PLA, ABS, PETG) พร้อมปรับแต่งสี เพื่อตรงตามความต้องการที่สุด</p>
                   </div>
 
                   <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
