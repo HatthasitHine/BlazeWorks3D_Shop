@@ -1,25 +1,37 @@
 import React from 'react';
 import { UploadCloud, File, Layers, Droplet, MessageCircle, Info, AlertCircle } from 'lucide-react';
 
+export const QUALITY_PRESETS = [
+  { id: 'basic', name: 'ความละเอียดพื้นฐาน (Layer 0.2mm)', layerHeight: 0.2 },
+  { id: 'low', name: 'ละเอียดน้อย (Layer 0.24mm)', layerHeight: 0.24 },
+  { id: 'high', name: 'ละเอียดมาก (Layer 0.16mm)', layerHeight: 0.16 },
+];
+
+export const STRENGTH_PRESETS = [
+  { id: 'low', name: 'ความแข็งแรงน้อย (15% Infill, 2 Walls)', walls: 2, infill: 15, volumeFactor: 0.35 },
+  { id: 'medium', name: 'ความแข็งแรงปานกลาง (40% Infill, 3 Walls)', walls: 3, infill: 40, volumeFactor: 0.60 },
+  { id: 'high', name: 'ความแข็งแรงสูง (60% Infill, 6 Walls)', walls: 6, infill: 60, volumeFactor: 0.85 },
+];
+
 export const MATERIALS = [
-  { id: 'pla_3bees', name: 'PLA', density: 1.24, pricePerMin: 1.3, pricePerG: 2 },
-  { id: 'petg_3bees', name: 'PETG', density: 1.29, pricePerMin: 1.25, pricePerG: 2 },
-  { id: 'abs_3bees', name: 'ABS', density: 1.08, pricePerMin: 1.5, pricePerG: 3 },
-  { id: 'placf_barefoot', name: 'PLA-CF', density: 1.24, pricePerMin: 1.75, pricePerG: 3, hidden: true },
-  { id: 'petgcf_barefoot', name: 'PETG-CF', density: 1.2, pricePerMin: 1.75, pricePerG: 3, hidden: true },
-  { id: 'htpla_polymaker', name: 'HT-PLA', density: 1.2, pricePerMin: 1.76, pricePerG: 3.2 },
-  { id: 'absfr_sunlu', name: 'ABS-FR', density: 1.27, pricePerMin: 1.78, pricePerG: 3.4 },
-  { id: 'pcpbt_threebees', name: 'PC-PBT', density: 1.24, pricePerMin: 1.78, pricePerG: 3.5 },
-  { id: 'asa_polymaker', name: 'ASA', density: 1.27, pricePerMin: 1.8, pricePerG: 4 },
-  { id: 'tpu95a_3bees', name: 'TPU 95A', density: 1.1, pricePerMin: 1.85, pricePerG: 4, hidden: true },
-  { id: 'pcabs_polymaker', name: 'PC-ABS', density: 1.1, pricePerMin: 4, pricePerG: 4, hidden: true },
-  { id: 'petcf17_fiberon', name: 'PET-CF17', density: 1.34, pricePerMin: 4, pricePerG: 4, hidden: true },
-  { id: 'pcpbtgf_polymaker', name: 'PC-PBT-GF', density: 1.04, pricePerMin: 4.5, pricePerG: 4.5 },
-  { id: 'copa_polymaker', name: 'CoPA', density: 1.12, pricePerMin: 4.5, pricePerG: 4.5, hidden: true },
-  { id: 'pa6gf_polymaker', name: 'PA6-GF', density: 1.2, pricePerMin: 5.6, pricePerG: 5, hidden: true },
-  { id: 'pa6cf_polymaker', name: 'PA6-CF', density: 1.17, pricePerMin: 8, pricePerG: 7, hidden: true },
-  { id: 'pa12cf_polymaker', name: 'PA12-CF', density: 1.16, pricePerMin: 12.5, pricePerG: 9, hidden: true },
-  { id: 'pa12cf_3dxtech', name: 'PA12-CF (3DXTech)', density: 1.16, pricePerMin: 15, pricePerG: 9, hidden: true },
+  { id: 'pla_3bees', name: 'PLA', density: 1.24, pricePerMin: 1.3, pricePerG: 2, vfrFactor: 1.0 },
+  { id: 'petg_3bees', name: 'PETG', density: 1.29, pricePerMin: 1.25, pricePerG: 2, vfrFactor: 0.6 },
+  { id: 'abs_3bees', name: 'ABS', density: 1.08, pricePerMin: 1.5, pricePerG: 3, vfrFactor: 0.6 },
+  { id: 'placf_barefoot', name: 'PLA-CF', density: 1.24, pricePerMin: 1.75, pricePerG: 3, hidden: true, vfrFactor: 1.0 },
+  { id: 'petgcf_barefoot', name: 'PETG-CF', density: 1.2, pricePerMin: 1.75, pricePerG: 3, hidden: true, vfrFactor: 0.6 },
+  { id: 'htpla_polymaker', name: 'HT-PLA', density: 1.2, pricePerMin: 1.76, pricePerG: 3.2, vfrFactor: 1.0 },
+  { id: 'absfr_sunlu', name: 'ABS-FR', density: 1.27, pricePerMin: 1.78, pricePerG: 3.4, vfrFactor: 0.6 },
+  { id: 'pcpbt_threebees', name: 'PC-PBT', density: 1.24, pricePerMin: 1.78, pricePerG: 3.5, vfrFactor: 0.6 },
+  { id: 'asa_polymaker', name: 'ASA', density: 1.27, pricePerMin: 1.8, pricePerG: 4, vfrFactor: 0.6 },
+  { id: 'tpu95a_3bees', name: 'TPU 95A', density: 1.1, pricePerMin: 1.85, pricePerG: 4, hidden: true, vfrFactor: 0.3 },
+  { id: 'pcabs_polymaker', name: 'PC-ABS', density: 1.1, pricePerMin: 4, pricePerG: 4, hidden: true, vfrFactor: 0.6 },
+  { id: 'petcf17_fiberon', name: 'PET-CF17', density: 1.34, pricePerMin: 4, pricePerG: 4, hidden: true, vfrFactor: 0.6 },
+  { id: 'pcpbtgf_polymaker', name: 'PC-PBT-GF', density: 1.04, pricePerMin: 4.5, pricePerG: 4.5, vfrFactor: 0.6 },
+  { id: 'copa_polymaker', name: 'CoPA', density: 1.12, pricePerMin: 4.5, pricePerG: 4.5, hidden: true, vfrFactor: 0.6 },
+  { id: 'pa6gf_polymaker', name: 'PA6-GF', density: 1.2, pricePerMin: 5.6, pricePerG: 5, hidden: true, vfrFactor: 0.6 },
+  { id: 'pa6cf_polymaker', name: 'PA6-CF', density: 1.17, pricePerMin: 8, pricePerG: 7, hidden: true, vfrFactor: 0.6 },
+  { id: 'pa12cf_polymaker', name: 'PA12-CF', density: 1.16, pricePerMin: 12.5, pricePerG: 9, hidden: true, vfrFactor: 0.6 },
+  { id: 'pa12cf_3dxtech', name: 'PA12-CF (3DXTech)', density: 1.16, pricePerMin: 15, pricePerG: 9, hidden: true, vfrFactor: 0.6 },
 ];
 
 export const COLORS = [
@@ -55,6 +67,9 @@ export default function PricingConfigurator({
 }) {
   const selectedMaterial = MATERIALS.find(m => m.id === material) || MATERIALS[0];
   const isPETG = selectedMaterial.id === 'petg_3bees';
+
+  const [quality, setQuality] = React.useState('basic');
+  const [strength, setStrength] = React.useState('medium');
   const [isColorDropdownOpen, setIsColorDropdownOpen] = React.useState(false);
 
   React.useEffect(() => {
@@ -83,23 +98,32 @@ export default function PricingConfigurator({
     }
   };
 
+  const selectedQuality = QUALITY_PRESETS.find(q => q.id === quality) || QUALITY_PRESETS[0];
+  const selectedStrength = STRENGTH_PRESETS.find(s => s.id === strength) || STRENGTH_PRESETS[1];
+
   // 1. ปริมาตรจริงจาก STL Mesh
   const finalVolume = volume;
 
-  // 2. น้ำหนักชิ้นงาน = volume * density
-  const weightGrams = finalVolume * selectedMaterial.density;
+  // 2. น้ำหนักชิ้นงาน = volume * density (ปรับตามความแข็งแรง)
+  const objectVolume = finalVolume * selectedStrength.volumeFactor;
+  const weightGrams = objectVolume * selectedMaterial.density;
 
-  // 3. น้ำหนัก Support = volume * 0.18 * 1.24
-  const supportGrams = finalVolume * 0.18 * 1.24;
+  // 3. น้ำหนัก Support (18% ของปริมาตรเริ่มต้น)
+  const supportVolume = finalVolume * 0.18;
+  const supportGrams = supportVolume * selectedMaterial.density;
   const totalGrams = weightGrams + supportGrams;
 
   // 4. คำนวณเวลาพิมพ์
   const nominalSpeed = (0.35 * 310) + (0.42 * 500) + (0.23 * 240); // 373.7 mm/s
-  const effectiveSpeed = nominalSpeed * 0.42; // ~156.954 mm/s
-  const flowCm3Min = (0.2 * 0.42) * effectiveSpeed * 60 / 1000; // ~0.791 cm³/min
-  const printVolume = finalVolume * 0.63; // 0.45 fill + 0.18 support
+  const vfrFactor = selectedMaterial.vfrFactor || 1.0;
+  const effectiveSpeed = nominalSpeed * 0.42 * vfrFactor;
+  const flowCm3Min = (selectedQuality.layerHeight * 0.42) * effectiveSpeed * 60 / 1000;
 
-  const estimatedMins = finalVolume > 0 ? (printVolume / flowCm3Min) + 5 : 0;
+  // เวลาพิมพ์ชิ้นงานและ support + 5 นาที (prep time)
+  const objectTimeMins = finalVolume > 0 ? (objectVolume / flowCm3Min) : 0;
+  const supportTimeMins = finalVolume > 0 ? (supportVolume / flowCm3Min) : 0;
+
+  const estimatedMins = finalVolume > 0 ? (objectTimeMins + supportTimeMins) + 5 : 0;
   const estimatedHours = estimatedMins / 60;
 
   // 5. คำนวณราคา
@@ -125,7 +149,8 @@ export default function PricingConfigurator({
   }
 
   // ราคารวม = ค่าพิมพ์ + ค่าจัดส่ง 50 บาท
-  const basePrice = finalVolume > 0 ? printPrice + 50 : 0;
+  const rawBasePrice = finalVolume > 0 ? printPrice + 50 : 0;
+  const basePrice = Math.ceil(rawBasePrice / 10) * 10;
 
   const formatPrice = (price) => {
     return price.toLocaleString('th-TH', { style: 'currency', currency: 'THB' });
@@ -140,9 +165,11 @@ export default function PricingConfigurator({
 
     let text = `สนใจสั่งพิมพ์ 3D\n`;
     text += `- ไฟล์: ${fileName}\n`;
+    text += `- ความละเอียด: ${selectedQuality.name}\n`;
+    text += `- ความแข็งแรง: ${selectedStrength.name}\n`;
     text += `- วัสดุ: ${selectedMaterial.name}\n`;
     text += `- สี: ${COLORS.find(c => c.hex === color)?.name || color}\n`;
-    text += `- ปริมาตร: ${finalVolume.toFixed(2)} cm³\n`;
+    text += `- ปริมาตรเริ่มต้น: ${finalVolume.toFixed(2)} cm³\n`;
     text += `- น้ำหนักรวม (ชิ้นงาน + Support): ${totalGrams.toFixed(2)} g\n`;
     text += `- เวลาพิมพ์โดยประมาณ: ${Math.floor(estimatedHours)} ชม. ${Math.round(estimatedMins % 60)} นาที\n`;
     text += `- ราคาประเมินแอป: ${formatPrice(basePrice)} (รวมค่าส่ง 50฿)\n\n`;
@@ -159,7 +186,7 @@ export default function PricingConfigurator({
     ['น้ำหนัก support', volume > 0 ? `+${supportGrams.toFixed(2)} g` : '—'],
     ['ความหนาแน่น', `${selectedMaterial.density} g/cm³`],
     ['เวลาพิมพ์ประมาณ', estimatedMins > 0 ? `${Math.floor(estimatedHours)} ชม. ${Math.round(estimatedMins % 60)} นาที` : '—'],
-    ['Infill / Walls', '20% / 2 walls'],
+    ['Infill / Walls', `${selectedStrength.infill}% / ${selectedStrength.walls} walls`],
   ];
 
   return (
@@ -233,6 +260,21 @@ export default function PricingConfigurator({
               </>
             )}
           </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+        <div>
+          <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">ความละเอียด (Quality)</label>
+          <select className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-[#72D1B7] focus:border-[#72D1B7] p-2.5 bg-gray-50 border" value={quality} onChange={e => setQuality(e.target.value)}>
+            {QUALITY_PRESETS.map(q => <option key={q.id} value={q.id}>{q.name}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">ความแข็งแรง (Strength)</label>
+          <select className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-[#72D1B7] focus:border-[#72D1B7] p-2.5 bg-gray-50 border" value={strength} onChange={e => setStrength(e.target.value)}>
+            {STRENGTH_PRESETS.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+          </select>
         </div>
       </div>
 

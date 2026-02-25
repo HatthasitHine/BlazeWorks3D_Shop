@@ -14,7 +14,7 @@ export default function Articles() {
                             <BookOpen size={32} />
                         </div>
                         <h1 className="text-4xl md:text-5xl font-black text-gray-900 mb-4 tracking-tight">
-                            บทความน่ารู้ <span className="text-[#72D1B7]">(Knowledge Base)</span>
+                            บทความน่ารู้
                         </h1>
                         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                             รวบรวมเกร็ดความรู้ เทคนิคการพิมพ์ และการเลือกใช้วัสดุให้เหมาะสมกับชิ้นงานของคุณ

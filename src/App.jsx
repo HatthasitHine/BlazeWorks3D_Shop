@@ -236,7 +236,7 @@ function App() {
         {activeTab === 'Home' && (
           <div className="mt-0 overflow-hidden relative min-h-[calc(100vh-80px)] bg-gradient-to-r from-purple-100 via-white to-emerald-100 flex flex-col justify-between">
             <div className="pt-12 pb-20 px-4 sm:px-8 relative z-10 flex-1 flex flex-col justify-center">
-              <div className="text-center mb-8 relative z-10" style={{ fontFamily: "'Inter', sans-serif" }}>
+              <div className="text-center mb-8 relative z-10">
                 <p className="text-sm sm:text-base font-medium text-gray-600 mb-4">Fused Deposition Modeling</p>
                 <h1 className="text-4xl sm:text-6xl md:text-7xl font-semibold text-gray-900 tracking-tight leading-[1.15]">
                   3D Printing Services
