@@ -1,16 +1,34 @@
-# React + Vite
+# 🖨️ BlazeWorks3D - Pricing Configurator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**BlazeWorks3D** เป็นร้านให้บริการพิมพ์ 3 มิติ (3D Printing Service) ตั้งอยู่ในพื้นที่ใกล้มหาวิทยาลัยนเรศวร จังหวัดพิษณุโลก โดยมีกลุ่มลูกค้าหลักคือ นักศึกษา อาจารย์ และผู้ประกอบการในพื้นที่ 
 
-Currently, two official plugins are available:
+โปรเจคต์นี้สร้างขึ้นมาเพื่อเป็น **Web Application สำหรับให้ลูกค้าประเมินราคาชิ้นงานเบื้องต้น** ด้วยตนเองก่อนทำการส่งคำสั่งซื้อจริง ช่วยให้สะดวกรวดเร็ว ลดเวลาในการรอแอดมินตอบคำถามเรื่องราคาเบื้องต้น และให้ลูกค้าสามารถเปรียบเทียบวัสดุต่างๆ ได้ด้วยตนเอง
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## ✨ ข้อมูลบริการของทางร้าน (Shop Context)
+รายละเอียดในแอพพลิเคชันนี้อ้างอิงจากบริการจริงของร้าน BlazeWorks3D:
+- **รูปแบบงานบรรจุในระบบ**: รองรับการพิมพ์แบบฉีดพลาสติก (FDM) ทั้งหมด (ทางร้านไม่ได้รับงาน Resin หรือรับเขียนแบบ/ขึ้นโมเดล)
+- **โมเดลการคิดราคา**: ระบบจะคำนวณจาก **เวลาที่ใช้พิมพ์จริง** (เริ่มต้นประมาณ 1.3 บาท/นาที) บวกกับค่าจัดส่งและค่าดำเนินการ
+- **ไฟล์ 3D ที่รองรับ**: ใช้งานได้กับไฟล์ `.stl`, `.obj`, `.3mf`, `.stp`, `.step` (ระบบไม่สามารถใช้ไฟล์จาก SketchUp ได้)
+- **ระยะเวลาดำเนินงาน (SLA)**: ประมาณ 3-7 วัน ขึ้นอยู่กับขนาดและคิวงานในขณะนั้น
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🛠️ วัสดุที่มีในระบบ (Supported Materials)
+ระบบมีฟังก์ชันให้ลูกค้าเลือกใช้วัสดุให้ตอบโจทย์กับงาน โดยมีตัวเลือกครอบคลุมตั้งแต่การพิมพ์ต้นแบบไปจนถึงชิ้นส่วนวิศวกรรม:
+- **การใช้งานทั่วไป & งานต้นแบบ**: PLA (เน้นประหยัด), PETG (ทนทานปานกลาง กันน้ำ ทนร้อน ~70°c)
+- **งานใช้งานจริง & งานกลางแจ้ง**: ABS (ทนความร้อนสูง ~100°c), ASA (ทน UV และสภาพอากาศ ~90°c)
+- **งานพลาสติกผสมเรซิ่นและคาร์บอน (Composite)**: PETG-CF (เสริมคาร์บอน น้ำหนักเบา แข็งแรง), HT-PLA (ผิวสวย ทนความร้อนสูงได้ถึง 150°c)
+- **พลาสติกวิศวกรรมเฉพาะทาง**: PC-PBT (ทนทานสารเคมี), PA6-CF (ความแข็งแรงขีดสุดสำหรับโครงสร้างที่รับแรงมาก)
 
-## Expanding the ESLint configuration
+*(ระบบจะปรับราคาประเมินต่อนาทีโดยอัตโนมัติตามวัสดุที่ลูกค้าเลือก)*
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## � ภาพรวมการทำงานของแอพพลิเคชัน (How It Works)
+ขั้นตอนการใช้งานแอพพลิเคชันที่ออกแบบมาเพื่อลูกค้าของร้าน:
+1. **อัปโหลดโมเดล**: ผู้ใช้นำไฟล์ 3D ใส่ในระบบเพื่อเริ่มการทำงาน
+2. **ประมวลผลโมเดล**: ระบบทำการวิเคราะห์ความกว้าง ยาว สูง และคำนวณปริมาตรรวมถึงน้ำหนัก (พร้อมแจ้งผู้ใช้ให้เช็คสเกลของไฟล์ตนเอง)
+3. **เลือกรูปแบบ**: ผู้ใช้เลือก "วัสดุ" และ "สี" ที่ต้องการใช้งาน
+4. **แสดงผลราคาประเมิน**: ระบบรับค่าน้ำหนักมาคำนวณหาเวลาที่จะใช้พิมพ์โดยประมาณ และแปลงเป็น "ราคาเบื้องต้นสุทธิ" (มีผลรวมค่าแพค/จัดส่งเรียบร้อยแล้ว)
+5. **สร้างคำสั่งซื้อ**: เมื่อผู้ใช้กดปุ่มสั่งทำ ข้อมูลทุกอย่างที่สกัดได้จากโมเดล 3D และตัวเลือกต่างๆ จะถูกส่งไปยังหน้าแชท (Inbox) ของแอดมิน BlazeWorks3D ทันที เพื่อให้การพูดคุยขั้นสุดท้ายง่ายที่สุด
+
+---
+*หมายเหตุเกี่ยวกับ Repository: ข้อมูลการตั้งค่าความเร็วของเครื่อง (Speed), อัตราการฉีดพลาสติก (Flow Rate), และสูตรหลังบ้านที่เป็นความลับทางการค้า ไม่ได้ถูกระบุขั้นตอนการทำงานโดยละเอียดไว้ในเอกสารเพื่อรักษาข้อมูลของทางร้าน*
