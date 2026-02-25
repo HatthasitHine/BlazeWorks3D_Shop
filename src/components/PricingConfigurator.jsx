@@ -46,143 +46,119 @@ export const COLORS = [
   { id: 'darkgray', name: 'เทาเข้ม', hex: '#A9A9A9' },
 ];
 
-const FILL_FACTOR = 0.45;
-const SUPPORT_FACTOR = 0.18;
-const SHIPPING = 50;
-const FLOW_CM3_MIN = (0.2 * 0.42) * (373.7 * 0.42) * 60 / 1000;
+export default function PricingConfigurator({
+  volume,
+  material, setMaterial,
+  color, setColor,
+  onFileChange,
+  fileName
+}) {
+  const selectedMaterial = MATERIALS.find(m => m.id === material) || MATERIALS[0];
+  const isPETG = selectedMaterial.id === 'petg_3bees';
+  const [isColorDropdownOpen, setIsColorDropdownOpen] = React.useState(false);
 
-const fmt = p => p.toLocaleString('th-TH', { style: 'currency', currency: 'THB' });
-
-function tetraVol(ax, ay, az, bx, by, bz, cx, cy, cz) {
-  return (ax * (by * cz - bz * cy) + ay * (bz * cx - bx * cz) + az * (bx * cy - by * cx)) / 6;
-}
-
-function parseBinarySTL(buf) {
-  const v = new DataView(buf);
-  const n = v.getUint32(80, true);
-  if (buf.byteLength < 84 + n * 50) return null;
-  let vol = 0;
-  for (let i = 0; i < n; i++) {
-    const b = 84 + i * 50 + 12;
-    vol += tetraVol(
-      v.getFloat32(b, true), v.getFloat32(b + 4, true), v.getFloat32(b + 8, true),
-      v.getFloat32(b + 12, true), v.getFloat32(b + 16, true), v.getFloat32(b + 20, true),
-      v.getFloat32(b + 24, true), v.getFloat32(b + 28, true), v.getFloat32(b + 32, true),
-    );
-  }
-  return Math.abs(vol) / 1000;
-}
-
-function parseASCIISTL(text) {
-  const re = /vertex\s+([\d.eE+\-]+)\s+([\d.eE+\-]+)\s+([\d.eE+\-]+)/g;
-  const verts = [];
-  let r;
-  while ((r = re.exec(text))) verts.push([+r[1], +r[2], +r[3]]);
-  if (verts.length % 3) return null;
-  let vol = 0;
-  for (let i = 0; i < verts.length; i += 3)
-    vol += tetraVol(...verts[i], ...verts[i + 1], ...verts[i + 2]);
-  return Math.abs(vol) / 1000;
-}
-
-async function getVolume(file) {
-  const buf = await file.arrayBuffer();
-  if (file.name.endsWith('.obj')) {
-    const lines = new TextDecoder().decode(buf).split('\n');
-    const verts = [];
-    let vol = 0;
-    for (const line of lines) {
-      const p = line.trim().split(/\s+/);
-      if (p[0] === 'v') verts.push([+p[1], +p[2], +p[3]]);
-      else if (p[0] === 'f') {
-        const idx = p.slice(1).map(x => parseInt(x) - 1);
-        for (let i = 1; i < idx.length - 1; i++) {
-          const [a, b, c] = [verts[idx[0]], verts[idx[i]], verts[idx[i + 1]]];
-          if (a && b && c) vol += tetraVol(...a, ...b, ...c);
-        }
-      }
+  React.useEffect(() => {
+    if (!isPETG && color !== '#222222') {
+      setColor('#222222');
     }
-    return Math.abs(vol) / 1000;
-  }
-  const header = String.fromCharCode(...new Uint8Array(buf, 0, 5)).toLowerCase();
-  if (header.startsWith('solid')) {
-    const n = new DataView(buf).getUint32(80, true);
-    if (84 + n * 50 === buf.byteLength) return parseBinarySTL(buf);
-    return parseASCIISTL(new TextDecoder().decode(buf));
-  }
-  return parseBinarySTL(buf);
-}
+  }, [isPETG, color, setColor]);
 
-export default function PricingConfigurator({ material, setMaterial, color, setColor }) {
-  const [mat, setMat] = React.useState('pla_3bees');
-  const [col, setCol] = React.useState('#222222');
-  const [fileName, setFileName] = React.useState('');
-  const [volume, setVolume] = React.useState(0);
-  const [error, setError] = React.useState('');
+  const availableColors = isPETG ? COLORS : COLORS.filter(c => c.id === 'black');
+
+  // Custom states added by user that were missing definitions
   const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState(null);
   const [dropOpen, setDropOpen] = React.useState(false);
 
-  const activeMat = material ?? mat;
-  const setActiveMat = setMaterial ?? setMat;
-  const activeCol = color ?? col;
-  const setActiveCol = setColor ?? setCol;
+  // Use props as defined previously
+  const activeMat = material;
+  const setActiveMat = setMaterial;
+  const activeCol = color;
+  const setActiveCol = setColor;
 
-  const sel = MATERIALS.find(m => m.id === activeMat) || MATERIALS[0];
-  const isPETG = sel.id === 'petg_3bees';
-
-  React.useEffect(() => { if (!isPETG) setActiveCol('#222222'); }, [isPETG]);
-
-  const handleFile = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setFileName(file.name); setVolume(0); setError(''); setLoading(true);
-    try {
-      const vol = await getVolume(file);
-      if (!vol || vol < 0.001) throw new Error('ปริมาตรน้อยเกินไป – ไฟล์อาจไม่ถูกต้อง');
-      setVolume(vol);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+  const handleFile = (e) => {
+    // Basic wrap to pass to App.jsx
+    if (onFileChange) {
+      onFileChange(e);
     }
   };
 
-  const weightG = volume * sel.density;
-  const supportG = volume * SUPPORT_FACTOR * 1.24;
-  const totalG = weightG + supportG;
-  const mins = volume > 0 ? (volume * (FILL_FACTOR + SUPPORT_FACTOR)) / FLOW_CM3_MIN + 5 : 0;
-  const hrs = mins / 60;
+  // 1. ปริมาตรจริงจาก STL Mesh
+  const finalVolume = volume;
 
-  let printPrice = 0, modeLabel = '';
-  if (volume > 0) {
-    if (hrs < 24) { printPrice = mins * sel.pricePerMin; modeLabel = `เวลา @ ${sel.pricePerMin} ฿/นาที`; }
-    else { printPrice = totalG * sel.pricePerG; modeLabel = `น้ำหนัก @ ${sel.pricePerG} ฿/กรัม`; }
+  // 2. น้ำหนักชิ้นงาน = volume * density
+  const weightGrams = finalVolume * selectedMaterial.density;
+
+  // 3. น้ำหนัก Support = volume * 0.18 * 1.24
+  const supportGrams = finalVolume * 0.18 * 1.24;
+  const totalGrams = weightGrams + supportGrams;
+
+  // 4. คำนวณเวลาพิมพ์
+  const nominalSpeed = (0.35 * 310) + (0.42 * 500) + (0.23 * 240); // 373.7 mm/s
+  const effectiveSpeed = nominalSpeed * 0.42; // ~156.954 mm/s
+  const flowCm3Min = (0.2 * 0.42) * effectiveSpeed * 60 / 1000; // ~0.791 cm³/min
+  const printVolume = finalVolume * 0.63; // 0.45 fill + 0.18 support
+
+  const estimatedMins = finalVolume > 0 ? (printVolume / flowCm3Min) + 5 : 0;
+  const estimatedHours = estimatedMins / 60;
+
+  // 5. คำนวณราคา
+  let printPrice = 0;
+  let calculationMode = "";
+  let modeLabel = "";
+
+  if (finalVolume > 0) {
+    if (estimatedHours < 24) {
+      printPrice = estimatedMins * selectedMaterial.pricePerMin;
+      calculationMode = "คิดตามเวลา (น้อยกว่า 24 ชม.)";
+      modeLabel = "เวลา";
+    } else {
+      printPrice = totalGrams * selectedMaterial.pricePerG;
+      calculationMode = "คิดตามน้ำหนัก (มากกว่า 24 ชม.)";
+      modeLabel = "น้ำหนัก";
+    }
   }
-  if (printPrice > 0 && printPrice < 50) printPrice = 50;
-  const total = printPrice > 0 ? printPrice + SHIPPING : 0;
 
+  // ราคาขั้นต่ำ 50 บาท (เฉพาะค่าพิมพ์)
+  if (printPrice > 0 && printPrice < 50) {
+    printPrice = 50;
+  }
+
+  // ราคารวม = ค่าพิมพ์ + ค่าจัดส่ง 50 บาท
+  const basePrice = finalVolume > 0 ? printPrice + 50 : 0;
+
+  const formatPrice = (price) => {
+    return price.toLocaleString('th-TH', { style: 'currency', currency: 'THB' });
+  };
+
+  // Send Order info to Messenger
   const handleOrder = () => {
-    if (!fileName || !volume) return alert('กรุณาอัปโหลดไฟล์ 3D ก่อน');
-    const text = [
-      'สนใจสั่งพิมพ์ 3D',
-      `- ไฟล์: ${fileName}`,
-      `- วัสดุ: ${sel.name}`,
-      `- สี: ${COLORS.find(c => c.hex === activeCol)?.name || activeCol}`,
-      `- ปริมาตร: ${volume.toFixed(3)} cm³`,
-      `- น้ำหนัก: ${totalG.toFixed(2)} g (รวม support)`,
-      `- ราคาประเมิน: ${fmt(total)} (รวมค่าส่ง ${fmt(SHIPPING)})`,
-      '', 'รบกวนประเมินราคาจริงให้หน่อยจ้า',
-      '*(กรุณาแนบไฟล์ 3D ในแชทนี้ด้วยครับ)*',
-    ].join('\n');
-    window.open(`https://m.me/IceBlazeLAB?text=${encodeURIComponent(text)}`, '_blank');
+    if (!fileName || finalVolume === 0) {
+      alert("กรุณาอัปโหลดไฟล์ 3D ก่อนทำการสั่งทำ");
+      return;
+    }
+
+    let text = `สนใจสั่งพิมพ์ 3D\n`;
+    text += `- ไฟล์: ${fileName}\n`;
+    text += `- วัสดุ: ${selectedMaterial.name}\n`;
+    text += `- สี: ${COLORS.find(c => c.hex === color)?.name || color}\n`;
+    text += `- ปริมาตร: ${finalVolume.toFixed(2)} cm³\n`;
+    text += `- น้ำหนักรวม (ชิ้นงาน + Support): ${totalGrams.toFixed(2)} g\n`;
+    text += `- เวลาพิมพ์โดยประมาณ: ${Math.floor(estimatedHours)} ชม. ${Math.round(estimatedMins % 60)} นาที\n`;
+    text += `- ราคาประเมินแอป: ${formatPrice(basePrice)} (รวมค่าส่ง 50฿)\n\n`;
+    text += `รบกวนประเมินราคาจริงให้หน่อยจ้า\n\n`;
+    text += `*(กรุณากดแนบไฟล์ 3D ให้ร้านอีกครั้งในแชทนี้ครับ)*`;
+
+    const encodedText = encodeURIComponent(text);
+    window.open(`https://m.me/IceBlazeLAB?text=${encodedText}`, '_blank');
   };
 
   const statRows = [
     ['ปริมาตร mesh จริง', volume > 0 ? `${volume.toFixed(3)} cm³` : '—'],
-    ['น้ำหนักชิ้นงาน', volume > 0 ? `${weightG.toFixed(2)} g` : '—'],
-    ['น้ำหนัก support', volume > 0 ? `+${supportG.toFixed(2)} g` : '—'],
-    ['ความหนาแน่น', `${sel.density} g/cm³`],
-    ['เวลาพิมพ์ประมาณ', mins > 0 ? `${Math.floor(hrs)} ชม. ${Math.round(mins % 60)} นาที` : '—'],
+    ['น้ำหนักชิ้นงาน', volume > 0 ? `${weightGrams.toFixed(2)} g` : '—'],
+    ['น้ำหนัก support', volume > 0 ? `+${supportGrams.toFixed(2)} g` : '—'],
+    ['ความหนาแน่น', `${selectedMaterial.density} g/cm³`],
+    ['เวลาพิมพ์ประมาณ', estimatedMins > 0 ? `${Math.floor(estimatedHours)} ชม. ${Math.round(estimatedMins % 60)} นาที` : '—'],
     ['Infill / Walls', '20% / 2 walls'],
   ];
 
@@ -260,14 +236,27 @@ export default function PricingConfigurator({ material, setMaterial, color, setC
         </div>
       </div>
 
-      <div className="bg-[#72D1B7]/10 rounded-lg p-5 border border-[#72D1B7]/20">
-        <div className="grid grid-cols-2 gap-3 mb-3 text-sm border-b border-[#72D1B7]/30 pb-3">
-          {statRows.map(([label, val]) => (
-            <div key={label}>
-              <span className="text-gray-500 block mb-0.5">{label}:</span>
-              <span className="font-semibold text-gray-800">{val}</span>
-            </div>
-          ))}
+      {/* Price Summary */}
+      <div className="mt-8 bg-[#72D1B7]/10 rounded-lg p-5 border border-[#72D1B7]/20">
+        <div className="grid grid-cols-2 gap-4 mb-3 text-sm border-b border-[#72D1B7]/30 pb-3">
+          <div>
+            <span className="text-gray-500 block mb-1">ปริมาตร:</span>
+            <span className="font-semibold text-gray-800">{finalVolume.toFixed(2)} cm³</span>
+          </div>
+          <div>
+            <span className="text-gray-500 block mb-1">น้ำหนักชิ้นงาน / Support:</span>
+            <span className="font-semibold text-gray-800">{weightGrams.toFixed(2)} g / {supportGrams.toFixed(2)} g</span>
+          </div>
+          <div>
+            <span className="text-gray-500 block mb-1">ความหนาแน่น:</span>
+            <span className="font-semibold text-gray-800">{selectedMaterial.density} g/cm³</span>
+          </div>
+          <div>
+            <span className="text-gray-500 block mb-1">เวลาพิมพ์โดยประมาณ:</span>
+            <span className="font-semibold text-gray-800">
+              {estimatedHours > 0 ? `${Math.floor(estimatedHours)} ชม. ${Math.round(estimatedMins % 60)} นาที` : '-'}
+            </span>
+          </div>
         </div>
 
         {volume > 0 && (
@@ -276,14 +265,9 @@ export default function PricingConfigurator({ material, setMaterial, color, setC
           </div>
         )}
 
-        <div className="space-y-1 mb-3 text-sm text-gray-600">
-          <div className="flex justify-between"><span>ค่าพิมพ์</span><span className="font-semibold text-gray-800">{fmt(printPrice)}</span></div>
-          <div className="flex justify-between"><span>ค่าจัดส่ง</span><span className="font-semibold text-gray-800">{fmt(SHIPPING)}</span></div>
-        </div>
-
-        <div className="flex justify-between items-center pt-2 pb-3 border-t border-[#72D1B7]/30">
-          <span className="text-lg font-bold text-gray-800">ราคารวม (เริ่มต้น):</span>
-          <span className="text-2xl font-black text-[#72D1B7]">{fmt(total)}</span>
+        <div className="flex justify-between items-center pt-2 pb-4">
+          <span className="text-lg font-bold text-gray-800">ราคารวม (รวมค่าส่ง 50฿):</span>
+          <span className="text-2xl font-black text-[#72D1B7]">{formatPrice(basePrice)}</span>
         </div>
 
         <button onClick={handleOrder} disabled={!fileName || !volume}
