@@ -194,6 +194,7 @@ function App() {
   const [fileName, setFileName] = useState('');
 
   const [volume, setVolume] = useState(0); // cm^3
+  const [dimensions, setDimensions] = useState({ x: 0, y: 0, z: 0 }); // NEW
   const [material, setMaterial] = useState('petg');
   const [color, setColor] = useState('#1e90ff');
   const [scale, setScale] = useState(100);
@@ -212,6 +213,12 @@ function App() {
     setFileExt(ext);
     setFileName(file.name);
     setVolume(0);
+    setDimensions({ x: 0, y: 0, z: 0 });
+  };
+
+  const handleVolumeCalculated = (vol, dims) => {
+    setVolume(vol);
+    if (dims) setDimensions(dims);
   };
 
   return (
@@ -505,7 +512,8 @@ function App() {
                 fileUrl={fileUrl}
                 fileExt={fileExt}
                 color={color}
-                onVolumeCalculated={setVolume}
+                dimensions={dimensions}
+                onVolumeCalculated={handleVolumeCalculated}
               />
             </div>
 
@@ -524,6 +532,7 @@ function App() {
 
                 <PricingConfigurator
                   volume={volume}
+                  dimensions={dimensions}
                   material={material} setMaterial={setMaterial}
                   color={color} setColor={setColor}
                   scale={scale} setScale={setScale}

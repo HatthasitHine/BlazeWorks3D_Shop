@@ -5,9 +5,21 @@ import * as THREE from 'three';
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
 
-export default function ModelViewer({ fileUrl, fileExt, color, onVolumeCalculated }) {
+export default function ModelViewer({ fileUrl, fileExt, color, dimensions, onVolumeCalculated }) {
   const [geometry, setGeometry] = useState(null);
   const [modelHeight, setModelHeight] = useState(0);
+
+  // Oversized checking
+  const isOversized = dimensions && (dimensions.x > 350 || dimensions.y > 350 || dimensions.z > 350);
+  const [showOversizeError, setShowOversizeError] = useState(false);
+
+  useEffect(() => {
+    if (isOversized) {
+      setShowOversizeError(true);
+    } else {
+      setShowOversizeError(false);
+    }
+  }, [isOversized]);
 
   useEffect(() => {
     if (!fileUrl) {
@@ -34,10 +46,6 @@ export default function ModelViewer({ fileUrl, fileExt, color, onVolumeCalculate
       }
 
       if (geo) {
-        geo.computeBoundingBox();
-        const bbox = geo.boundingBox;
-        const height = bbox.max.y - bbox.min.y;
-
         const calculateRealVolume = (geometry) => {
           const position = geometry.attributes.position;
           if (!position) return 0;
@@ -73,12 +81,22 @@ export default function ModelViewer({ fileUrl, fileExt, color, onVolumeCalculate
         // Fix Orientation: Rotate geometry by -90 degrees on the X-axis so it stands upright
         geo.rotateX(-Math.PI / 2);
 
+        // Center geometry first
         geo.center();
+
+        // Compute bounding box after rotation
+        geo.computeBoundingBox();
+        const bbox = geo.boundingBox;
+        const sizeX = bbox.max.x - bbox.min.x;
+        const sizeY = bbox.max.y - bbox.min.y;
+        const sizeZ = bbox.max.z - bbox.min.z;
+        const height = sizeY;
+
         setGeometry(geo);
         setModelHeight(height);
 
         if (onVolumeCalculated) {
-          onVolumeCalculated(estimatedVolume);
+          onVolumeCalculated(estimatedVolume, { x: sizeX, y: sizeY, z: sizeZ });
         }
       }
     }, undefined, (error) => {
@@ -129,6 +147,39 @@ export default function ModelViewer({ fileUrl, fileExt, color, onVolumeCalculate
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
           </svg>
           {fileUrl ? <p className="font-medium animate-pulse">กำลังโหลดโมเดล...</p> : <p className="font-medium">อัปโหลดไฟล์ 3D (.stl, .obj) เพื่อดูตัวอย่างที่นี่</p>}
+        </div>
+      )}
+
+      {/* Oversize Error Toast */}
+      {showOversizeError && (
+        <div className="absolute bottom-6 right-6 z-50 bg-[#E54D4D] text-white p-4 rounded-sm shadow-xl flex items-start w-[380px] max-w-[90vw]">
+          <div className="mr-3 mt-0.5 shrink-0 relative">
+            <div className="bg-[#E7E7E7] rounded-full w-8 h-8 flex items-center justify-center text-[#E54D4D] font-bold text-xl">
+              !
+            </div>
+            <div className="absolute -bottom-1 -right-2 text-black">
+              <svg width="24" height="10" viewBox="0 0 24 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2 6 Q 6 2 10 6 T 18 6" stroke="#000" strokeWidth="1.5" fill="none" />
+                <circle cx="18" cy="6" r="2" fill="#000" />
+                <circle cx="19" cy="6" r="1" fill="#FFF" />
+              </svg>
+            </div>
+          </div>
+          <div className="flex-1 pr-6 font-sans text-[13.5px] leading-[1.4] tracking-wide text-[#fafafa]">
+            <p className="mb-0">Error:</p>
+            <p className="mb-0">An object is laid over the plate boundaries or exceeds the height limit.</p>
+            <p className="mt-0.5">Please solve the problem by moving it totally on or off the plate, and confirming that the height is within the build volume.</p>
+          </div>
+          <button
+            onClick={() => setShowOversizeError(false)}
+            className="text-white hover:text-gray-200 shrink-0 absolute top-4 right-4"
+            aria-label="Close"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
         </div>
       )}
     </div>

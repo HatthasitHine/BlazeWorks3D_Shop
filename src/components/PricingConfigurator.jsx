@@ -60,6 +60,7 @@ export const COLORS = [
 
 export default function PricingConfigurator({
   volume,
+  dimensions = { x: 0, y: 0, z: 0 },
   material, setMaterial,
   color, setColor,
   onFileChange,
@@ -84,6 +85,9 @@ export default function PricingConfigurator({
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState(null);
   const [dropOpen, setDropOpen] = React.useState(false);
+
+  // Oversized checking
+  const isOversized = dimensions.x > 350 || dimensions.y > 350 || dimensions.z > 350;
 
   // Use props as defined previously
   const activeMat = material;
@@ -312,7 +316,7 @@ export default function PricingConfigurator({
           <span className="text-2xl font-black text-[#72D1B7]">{formatPrice(basePrice)}</span>
         </div>
 
-        <button onClick={handleOrder} disabled={!fileName || !volume}
+        <button onClick={handleOrder} disabled={!fileName || !volume || isOversized}
           className="w-full bg-[#72D1B7] hover:bg-[#5bb89e] text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
           <MessageCircle className="w-5 h-5" /> ส่งข้อมูลการสั่งทำ
         </button>
