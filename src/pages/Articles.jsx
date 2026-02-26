@@ -80,10 +80,6 @@ export default function Articles() {
                                             <span className="text-sm text-gray-400 flex items-center gap-2">
                                                 <ExternalLink size={14} /> {article.sourceInfo}
                                             </span>
-                                            <button className="text-[#72D1B7] font-bold text-sm hover:text-[#5bb89e] flex items-center gap-1 group/btn">
-                                                อ่านเพิ่มเติม
-                                                <span className="transform transition-transform group-hover/btn:translate-x-1">→</span>
-                                            </button>
                                         </div>
 
                                     </div>

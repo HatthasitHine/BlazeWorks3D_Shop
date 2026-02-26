@@ -13,7 +13,7 @@ const articlesData = [
     imageUrl: "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=800&q=80",
     date: "14 ก.พ. 2026",
     readTime: "อ่าน 5 นาที",
-    sourceInfo: "อ้างอิงและตั้งค่าแปลจาก Hubs.com"
+    sourceInfo: "อ้างอิงจาก Hubs.com"
   },
   {
     id: 2,
