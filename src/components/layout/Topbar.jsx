@@ -16,7 +16,8 @@ export default function Topbar({ activeTab, setActiveTab }) {
 
   return (
     <>
-      <header className="bg-white h-20 shadow-sm flex items-center justify-between px-4 md:px-8 sticky top-0 z-40">
+      <div className="h-20 w-full shrink-0 block"></div>
+      <header className="bg-white h-20 shadow-sm flex items-center justify-between px-4 md:px-8 fixed w-full top-0 left-0 z-40">
 
         {/* 1. Logo (Left) */}
         <div className="flex items-center font-bold text-xl md:text-2xl tracking-wider cursor-pointer" onClick={() => setActiveTab('Home')}>
