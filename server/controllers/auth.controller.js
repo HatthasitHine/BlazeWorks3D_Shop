@@ -150,23 +150,20 @@ export const forgotPassword = async (req, res) => {
     const resetLink = `${frontendUrl}/?tab=ResetPassword&token=${resetToken}`;
 
     const info = await transporter.sendMail({
-      from: '"MitrFlow3D Admin" <admin@mitrflow3d.com>',
+      from: '"BLAZEWORKS 3D Admin" <admin@blazeworks3d.com>',
       to: user.email,
-      subject: "คำขอตั้งรหัสผ่านใหม่ (MitrFlow3D)",
+      subject: "คำขอตั้งรหัสผ่านใหม่ (BLAZEWORKS 3D)",
       html: `
         <h2>ตั้งรหัสผ่านใหม่</h2>
-        <p>คุณได้ทำการขอตั้งรหัสผ่านใหม่สำหรับระบบ MitrFlow3D</p>
+        <p>คุณได้ทำการขอตั้งรหัสผ่านใหม่สำหรับระบบ BLAZEWORKS 3D</p>
         <p>กรุณาคลิกที่ลิงก์ด้านล่างเพื่อทำการเปลี่ยนรหัสผ่าน (ลิงก์มีอายุ 1 ชั่วโมง):</p>
         <a href="${resetLink}" style="display:inline-block;padding:10px 20px;background-color:#72D1B7;color:white;text-decoration:none;border-radius:5px;font-weight:bold;">รีเซ็ตรหัสผ่าน</a>
-        <br/><br/>
-        <p>หากปุ่มกดไม่ได้ ให้คัดลอกลิงก์ด้านล่างไปเปิดในเบราว์เซอร์:</p>
-        <p>${resetLink}</p>
       `,
     });
 
     console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
 
-    res.json({ message: 'ส่งลิงก์ตั้งรหัสผ่านใหม่ไปที่อีเมลของคุณแล้ว (เช็ค Console สำหรับ Ethereal Link)' });
+    res.json({ message: 'ส่งลิงก์ตั้งรหัสผ่านใหม่ไปที่อีเมลของคุณแล้ว' });
 
   } catch (error) {
     console.error(error);
