@@ -15,7 +15,7 @@ export default function Dashboard({ setActiveTab }) {
   const fetchStats = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:3001/api/analytics/stats', {
+      const res = await axios.get((import.meta.env.VITE_API_URL || 'http://localhost:3001') + '/api/analytics/stats', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setStats(res.data);
@@ -43,7 +43,7 @@ export default function Dashboard({ setActiveTab }) {
     if (window.confirm('คุณแน่ใจหรือไม่ว่าต้องการรีเซ็ตสถิติทั้งหมด? การกระทำนี้ไม่สามารถกู้คืนได้')) {
       try {
         const token = localStorage.getItem('token');
-        await axios.delete('http://localhost:3001/api/analytics/reset', {
+        await axios.delete((import.meta.env.VITE_API_URL || 'http://localhost:3001') + '/api/analytics/reset', {
           headers: { Authorization: `Bearer ${token}` }
         });
         alert('รีเซ็ตข้อมูลสถิติเรียบร้อยแล้ว');

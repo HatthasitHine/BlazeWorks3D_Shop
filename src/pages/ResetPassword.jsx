@@ -37,7 +37,7 @@ export default function ResetPassword({ setActiveTab, initialToken }) {
     setIsLoading(true);
 
     try {
-      const res = await axios.post('http://localhost:3001/api/auth/reset-password', { token, newPassword: password });
+      const res = await axios.post((import.meta.env.VITE_API_URL || 'http://localhost:3001') + '/api/auth/reset-password', { token, newPassword: password });
       setMessage(res.data.message);
     } catch (err) {
       setError(err.response?.data?.message || 'เกิดข้อผิดพลาด หรือลิงก์หมดอายุแล้ว');

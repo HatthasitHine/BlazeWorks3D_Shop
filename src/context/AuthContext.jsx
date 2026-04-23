@@ -9,7 +9,7 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUser = async (token) => {
     try {
-      const res = await axios.get('http://localhost:3001/api/auth/me', {
+      const res = await axios.get((import.meta.env.VITE_API_URL || 'http://localhost:3001') + '/api/auth/me', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUser(res.data);

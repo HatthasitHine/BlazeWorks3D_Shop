@@ -20,7 +20,7 @@ export const useAnalytics = (activeTab) => {
         const token = localStorage.getItem('token');
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
         
-        const res = await axios.post('http://localhost:3001/api/analytics/visit', 
+        const res = await axios.post((import.meta.env.VITE_API_URL || 'http://localhost:3001') + '/api/analytics/visit', 
           { page: activeTab }, 
           { headers }
         );
@@ -32,7 +32,7 @@ export const useAnalytics = (activeTab) => {
           intervalRef.current = setInterval(async () => {
             durationRef.current += 10;
             try {
-              await axios.post('http://localhost:3001/api/analytics/heartbeat', {
+              await axios.post((import.meta.env.VITE_API_URL || 'http://localhost:3001') + '/api/analytics/heartbeat', {
                 visitId: visitIdRef.current,
                 duration: durationRef.current
               });

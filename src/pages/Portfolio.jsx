@@ -26,7 +26,7 @@ export default function Portfolio() {
 
     const fetchItems = async () => {
         try {
-            const res = await axios.get('http://localhost:3001/api/portfolio');
+            const res = await axios.get((import.meta.env.VITE_API_URL || 'http://localhost:3001') + '/api/portfolio');
             setItems(res.data);
         } catch (error) {
             console.error('Error fetching portfolio items', error);
@@ -54,7 +54,7 @@ export default function Portfolio() {
         if (window.confirm('คุณแน่ใจหรือไม่ว่าต้องการลบผลงานนี้?')) {
             try {
                 const token = localStorage.getItem('token');
-                await axios.delete(`http://localhost:3001/api/portfolio/${id}`, {
+                await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/portfolio/${id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 fetchItems();
@@ -84,13 +84,13 @@ export default function Portfolio() {
             }
 
             if (editingId) {
-                await axios.put(`http://localhost:3001/api/portfolio/${editingId}`, submitData, { headers });
+                await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/portfolio/${editingId}`, submitData, { headers });
             } else {
                 if (!imageFile) {
                     alert('กรุณาเลือกรูปภาพ');
                     return;
                 }
-                await axios.post('http://localhost:3001/api/portfolio', submitData, { headers });
+                await axios.post((import.meta.env.VITE_API_URL || 'http://localhost:3001') + '/api/portfolio', submitData, { headers });
             }
 
             setIsModalOpen(false);

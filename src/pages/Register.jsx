@@ -19,9 +19,9 @@ export default function Register({ setActiveTab }) {
     setIsLoading(true);
 
     try {
-      const res = await axios.post('http://localhost:3001/api/auth/register', { username, email, password });
+      const res = await axios.post((import.meta.env.VITE_API_URL || 'http://localhost:3001') + '/api/auth/register', { username, email, password });
       // After register, auto login
-      const loginRes = await axios.post('http://localhost:3001/api/auth/login', { username, password });
+      const loginRes = await axios.post((import.meta.env.VITE_API_URL || 'http://localhost:3001') + '/api/auth/login', { username, password });
       login(loginRes.data.token, loginRes.data.user);
       setActiveTab('Home');
     } catch (err) {
