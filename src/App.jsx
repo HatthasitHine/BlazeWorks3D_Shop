@@ -16,12 +16,16 @@ import Register from './pages/Register';
 import Settings from './pages/Settings';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import Dashboard from './pages/Dashboard';
+import { useAnalytics } from './hooks/useAnalytics';
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState('Home');
   const [resetToken, setResetToken] = useState(null);
   const { user, isLoading } = useContext(AuthContext);
   const cursorRef = useRef(null);
+
+  useAnalytics(activeTab);
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -89,12 +93,13 @@ function AppContent() {
         {activeTab === 'Service' && <Service />}
         {activeTab === 'Queue' && <Queue />}
         {activeTab === 'About' && <About />}
-        {activeTab === 'Price' && <Price />}
+        {activeTab === 'Price' && <Price setActiveTab={setActiveTab} />}
         {activeTab === 'Login' && <Login setActiveTab={setActiveTab} />}
         {activeTab === 'Register' && <Register setActiveTab={setActiveTab} />}
         {activeTab === 'Settings' && <Settings setActiveTab={setActiveTab} />}
         {activeTab === 'ForgotPassword' && <ForgotPassword setActiveTab={setActiveTab} />}
         {activeTab === 'ResetPassword' && <ResetPassword setActiveTab={setActiveTab} initialToken={resetToken} />}
+        {activeTab === 'Dashboard' && <Dashboard setActiveTab={setActiveTab} />}
       </main>
 
       <FacebookChat pageId="123456789012345" />

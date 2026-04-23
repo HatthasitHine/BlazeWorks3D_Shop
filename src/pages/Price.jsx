@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import ModelViewer from '../components/ModelViewer';
 import PricingConfigurator from '../components/PricingConfigurator';
+import { AuthContext } from '../context/AuthContext';
+import Footer from '../components/layout/Footer';
 
-export default function Price() {
+export default function Price({ setActiveTab }) {
+  const { user } = useContext(AuthContext);
+
   const [fileUrl, setFileUrl] = useState(null);
   const [fileExt, setFileExt] = useState('');
   const [fileName, setFileName] = useState('');
@@ -13,6 +17,23 @@ export default function Price() {
   const [color, setColor] = useState('#1e90ff');
   const [scale, setScale] = useState(100);
   const [isConfiguratorOpen, setIsConfiguratorOpen] = useState(true);
+
+  if (!user) {
+    return (
+      <div className="min-h-[calc(100vh-80px)] w-full flex flex-col justify-between bg-gray-50">
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center p-8 bg-white rounded-3xl shadow-xl border border-gray-100 max-w-md w-full mx-4">
+            <h2 className="text-2xl font-black text-gray-800 mb-4">เข้าสู่ระบบเพื่อใช้งาน</h2>
+            <p className="text-gray-500 mb-8">คุณจำเป็นต้องเข้าสู่ระบบก่อน เพื่อใช้งานระบบประเมินราคาและสั่งพิมพ์ 3D ของเรา</p>
+            <button onClick={() => setActiveTab('Login')} className="w-full bg-[#72D1B7] hover:bg-[#5bb89e] text-white py-3 rounded-xl font-bold transition-all shadow-md">
+              ไปหน้าเข้าสู่ระบบ / สมัครสมาชิก
+            </button>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];

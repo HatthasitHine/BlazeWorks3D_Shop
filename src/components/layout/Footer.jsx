@@ -34,7 +34,7 @@ export default function Footer() {
                         <li>
                             <a href="https://www.facebook.com/IceBlazeLAB" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-[#72D1B7] transition-colors font-medium">
                                 <Facebook size={18} className="text-[#72D1B7]" />
-                                IceBlazeLAB
+                                BlazeWorks 3D
                             </a>
                         </li>
                         <li>

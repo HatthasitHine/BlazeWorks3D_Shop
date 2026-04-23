@@ -22,3 +22,23 @@ model User {
   resetTokenExpiry   DateTime?
   createdAt          DateTime  @default(now())
 }
+
+model PortfolioItem {
+  id        Int      @id @default(autoincrement())
+  partName  String
+  material  String
+  printTime String
+  price     String
+  imageUrl  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PageVisit {
+  id        Int      @id @default(autoincrement())
+  page      String
+  duration  Int      @default(0) // Duration in seconds
+  userId    Int?     // Optional relation to User if logged in
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
