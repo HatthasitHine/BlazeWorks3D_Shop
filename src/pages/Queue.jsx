@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Activity, Loader } from 'lucide-react';
 import Footer from '../components/layout/Footer';
 import { tracker } from '../utils/tracker';
+import { AuthContext } from '../context/AuthContext';
 
 export default function Queue() {
   const [queues, setQueues] = useState([]);
+  const { user } = useContext(AuthContext);
+  const isAdmin = user && user.role === 'ADMIN';
 
   useEffect(() => {
     // Load initial jobs from tracker
@@ -97,6 +100,7 @@ export default function Queue() {
     });
   };
 
+  const [newQOrderId, setNewQOrderId] = useState('');
   const [newQDays, setNewQDays] = useState('');
   const [newQHours, setNewQHours] = useState('');
   const [newQMins, setNewQMins] = useState('');
@@ -112,7 +116,6 @@ export default function Queue() {
     const totalSeconds = (d * 86400) + (h * 3600) + (m * 60) + s;
     if (totalSeconds <= 0) return;
 
-    // Optional: save to tracker if needed, but for manual queue we can just push local
     const newJob = tracker.createPrintJob({
       estimatedSeconds: totalSeconds,
       source: 'manual'
@@ -122,12 +125,14 @@ export default function Queue() {
       ...prev,
       {
         id: newJob.id,
+        orderId: newQOrderId || '-',
         initialTime: totalSeconds,
         timeRemaining: totalSeconds,
         isPrinting: false,
         originalJob: newJob
       }
     ]);
+    setNewQOrderId('');
     setNewQDays('');
     setNewQHours('');
     setNewQMins('');
@@ -141,18 +146,21 @@ export default function Queue() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">คิวงานปัจจุบัน (Live Queue)</h1>
-              <form onSubmit={handleAddQueue} className="flex flex-wrap items-center gap-1.5 sm:gap-2 bg-white p-2.5 sm:p-3 rounded-xl border border-gray-200 shadow-sm">
-                <span className="text-sm font-bold text-gray-700 mr-1">+ เพิ่มคิว:</span>
-                <input type="number" min="0" placeholder="วัน" value={newQDays} onChange={(e) => setNewQDays(e.target.value)} className="w-[50px] sm:w-[60px] border border-gray-300 rounded-lg p-1.5 text-xs sm:text-sm text-center" />
-                <span className="text-gray-500 text-xs">วัน</span>
-                <input type="number" min="0" max="24" placeholder="ชม." value={newQHours} onChange={(e) => setNewQHours(e.target.value)} className="w-[50px] sm:w-[60px] border border-gray-300 rounded-lg p-1.5 text-xs sm:text-sm text-center" />
-                <span className="text-gray-500 text-xs">ชม.</span>
-                <input type="number" min="0" max="60" placeholder="นาที" value={newQMins} onChange={(e) => setNewQMins(e.target.value)} className="w-[50px] sm:w-[60px] border border-gray-300 rounded-lg p-1.5 text-xs sm:text-sm text-center" />
-                <span className="text-gray-500 text-xs">นาที</span>
-                <input type="number" min="0" max="60" placeholder="วิฯ" value={newQSecs} onChange={(e) => setNewQSecs(e.target.value)} className="w-[50px] sm:w-[60px] border border-gray-300 rounded-lg p-1.5 text-xs sm:text-sm text-center" />
-                <span className="text-gray-500 text-xs">วิฯ</span>
-                <button type="submit" disabled={!newQDays && !newQHours && !newQMins && !newQSecs} className="bg-[#72D1B7] hover:bg-[#5bb89e] text-white px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition disabled:opacity-50 ml-1">Add</button>
-              </form>
+              {isAdmin && (
+                <form onSubmit={handleAddQueue} className="flex flex-wrap items-center gap-1.5 sm:gap-2 bg-white p-2.5 sm:p-3 rounded-xl border border-gray-200 shadow-sm">
+                  <span className="text-sm font-bold text-gray-700 mr-1">+ เพิ่มคิว:</span>
+                  <input type="text" placeholder="ชื่อ/รหัสออเดอร์" value={newQOrderId} onChange={(e) => setNewQOrderId(e.target.value)} className="w-[100px] sm:w-[140px] border border-gray-300 rounded-lg p-1.5 text-xs sm:text-sm" />
+                  <input type="number" min="0" placeholder="วัน" value={newQDays} onChange={(e) => setNewQDays(e.target.value)} className="w-[50px] sm:w-[60px] border border-gray-300 rounded-lg p-1.5 text-xs sm:text-sm text-center" />
+                  <span className="text-gray-500 text-xs">วัน</span>
+                  <input type="number" min="0" max="24" placeholder="ชม." value={newQHours} onChange={(e) => setNewQHours(e.target.value)} className="w-[50px] sm:w-[60px] border border-gray-300 rounded-lg p-1.5 text-xs sm:text-sm text-center" />
+                  <span className="text-gray-500 text-xs">ชม.</span>
+                  <input type="number" min="0" max="60" placeholder="นาที" value={newQMins} onChange={(e) => setNewQMins(e.target.value)} className="w-[50px] sm:w-[60px] border border-gray-300 rounded-lg p-1.5 text-xs sm:text-sm text-center" />
+                  <span className="text-gray-500 text-xs">นาที</span>
+                  <input type="number" min="0" max="60" placeholder="วิฯ" value={newQSecs} onChange={(e) => setNewQSecs(e.target.value)} className="w-[50px] sm:w-[60px] border border-gray-300 rounded-lg p-1.5 text-xs sm:text-sm text-center" />
+                  <span className="text-gray-500 text-xs">วิฯ</span>
+                  <button type="submit" disabled={!newQDays && !newQHours && !newQMins && !newQSecs} className="bg-[#72D1B7] hover:bg-[#5bb89e] text-white px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition disabled:opacity-50 ml-1">Add</button>
+                </form>
+              )}
             </div>
 
             <div className="bg-[#72D1B7]/10 text-[#72D1B7] font-bold px-4 py-2 rounded-full flex items-center gap-2 shrink-0">
@@ -166,20 +174,22 @@ export default function Queue() {
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100 text-gray-600 font-semibold text-center text-sm md:text-base">
                   <th className="p-4 md:p-5 w-16 md:w-24">#</th>
+                  <th className="p-4 md:p-5">ชื่อ/รหัสออเดอร์</th>
                   <th className="p-4 md:p-5">สถานะ</th>
                   <th className="p-4 md:p-5 w-1/4">เวลาเหลือ</th>
-                  <th className="p-4 md:p-5 w-1/4">จัดการคิว</th>
+                  {isAdmin && <th className="p-4 md:p-5 w-1/4">จัดการคิว</th>}
                 </tr>
               </thead>
               <tbody>
                 {queues.length === 0 ? (
-                  <tr><td colSpan="4" className="p-8 text-center text-gray-400">ตอนนี้ไม่มีคิวงาน ว่างพิมพ์ได้ทันที!</td></tr>
+                  <tr><td colSpan={isAdmin ? "5" : "4"} className="p-8 text-center text-gray-400">ตอนนี้ไม่มีคิวงาน ว่างพิมพ์ได้ทันที!</td></tr>
                 ) : (
                   queues.map((q, index) => {
                     const currentStatus = q.isPrinting ? 'PRINTING' : 'WAIT FOR PRINT';
                     return (
                       <tr key={q.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors text-center text-sm md:text-base">
                         <td className="p-4 md:p-5 font-bold text-gray-500 text-lg">{index + 1}</td>
+                        <td className="p-4 md:p-5 font-medium text-gray-800">{q.orderId || '-'}</td>
                         <td className="p-4 md:p-5">
                           <span className={`inline-flex items-center justify-center gap-1.5 px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs font-bold ${q.isPrinting ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`}>
                             {q.isPrinting && <Loader size={14} className="animate-spin" />}
@@ -189,18 +199,20 @@ export default function Queue() {
                         <td className="p-4 md:p-5 font-mono text-lg md:text-xl font-bold text-gray-700">
                           {formatTime(q.timeRemaining)}
                         </td>
-                        <td className="p-4 md:p-5 flex flex-col sm:flex-row gap-2 justify-center items-center">
-                          {q.isPrinting ? (
-                            <button onClick={() => handleCancelPrint(index)} className="bg-red-100 text-red-600 hover:bg-red-200 px-3 py-1.5 rounded-lg text-xs md:text-sm font-bold transition whitespace-nowrap">ยกเลิก / รีเซ็ต</button>
-                          ) : (
-                            <>
-                              {index === 0 && !queues.some(item => item.isPrinting) && (
-                                <button onClick={() => handleConfirmPrint(index)} className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs md:text-sm font-bold transition whitespace-nowrap">Confirm Print</button>
-                              )}
-                              <button onClick={() => handleDeleteQueue(index)} className="bg-gray-100 text-gray-600 hover:bg-red-100 hover:text-red-600 px-3 py-1.5 rounded-lg text-xs md:text-sm font-bold transition whitespace-nowrap">ลบคิว</button>
-                            </>
-                          )}
-                        </td>
+                        {isAdmin && (
+                          <td className="p-4 md:p-5 flex flex-col sm:flex-row gap-2 justify-center items-center">
+                            {q.isPrinting ? (
+                              <button onClick={() => handleCancelPrint(index)} className="bg-red-100 text-red-600 hover:bg-red-200 px-3 py-1.5 rounded-lg text-xs md:text-sm font-bold transition whitespace-nowrap">ยกเลิก / รีเซ็ต</button>
+                            ) : (
+                              <>
+                                {index === 0 && !queues.some(item => item.isPrinting) && (
+                                  <button onClick={() => handleConfirmPrint(index)} className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs md:text-sm font-bold transition whitespace-nowrap">Confirm Print</button>
+                                )}
+                                <button onClick={() => handleDeleteQueue(index)} className="bg-gray-100 text-gray-600 hover:bg-red-100 hover:text-red-600 px-3 py-1.5 rounded-lg text-xs md:text-sm font-bold transition whitespace-nowrap">ลบคิว</button>
+                              </>
+                            )}
+                          </td>
+                        )}
                       </tr>
                     );
                   })
