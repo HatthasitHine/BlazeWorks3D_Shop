@@ -1,5 +1,6 @@
 import React from 'react';
 import { UploadCloud, File, Layers, Droplet, MessageCircle, Info, AlertCircle } from 'lucide-react';
+import { tracker } from '../utils/tracker';
 
 export const QUALITY_PRESETS = [
   { id: 'basic', name: 'ความละเอียดพื้นฐาน (Layer 0.2mm)', layerHeight: 0.2 },
@@ -166,6 +167,22 @@ export default function PricingConfigurator({
       alert("กรุณาอัปโหลดไฟล์ 3D ก่อนทำการสั่งทำ");
       return;
     }
+
+    // 1. Log PrintJob locally using tracker.js (From Flow.md)
+    const newJob = tracker.createPrintJob({
+      fileName,
+      quality: selectedQuality.name,
+      strength: selectedStrength.name,
+      material: selectedMaterial.name,
+      color: COLORS.find(c => c.hex === color)?.name || color,
+      volume: finalVolume,
+      estimatedSeconds: estimatedMins * 60,
+      price: basePrice
+    });
+
+    // 2. Mark task as done
+    tracker.markDone('create_print_job', newJob.id);
+    tracker.markDone('send_facebook_message', newJob.id);
 
     let text = `สนใจสั่งพิมพ์ 3D\n`;
     text += `- ไฟล์: ${fileName}\n`;
