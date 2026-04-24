@@ -22,7 +22,7 @@ export const createPortfolioItem = async (req, res) => {
     let imageUrl = '';
 
     if (req.file) {
-      imageUrl = `http://localhost:3001/uploads/${req.file.filename}`;
+      imageUrl = `/uploads/${req.file.filename}`;
     }
 
     const newItem = await prisma.portfolioItem.create({
@@ -57,7 +57,7 @@ export const updatePortfolioItem = async (req, res) => {
     };
 
     if (req.file) {
-      updateData.imageUrl = `http://localhost:3001/uploads/${req.file.filename}`;
+      updateData.imageUrl = `/uploads/${req.file.filename}`;
     }
 
     const updatedItem = await prisma.portfolioItem.update({
