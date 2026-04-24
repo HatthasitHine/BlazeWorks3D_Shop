@@ -146,7 +146,7 @@ export const forgotPassword = async (req, res) => {
       });
     }
 
-    const frontendUrl = req.headers.origin || 'http://localhost:5173';
+    const frontendUrl = process.env.FRONTEND_URL || req.headers.origin || 'http://localhost:5173';
     const resetLink = `${frontendUrl}/?tab=ResetPassword&token=${resetToken}`;
 
     const info = await transporter.sendMail({
