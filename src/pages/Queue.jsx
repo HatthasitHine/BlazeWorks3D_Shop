@@ -1,103 +1,117 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Activity, Loader } from 'lucide-react';
+import { Activity, Loader, Trash2, Play, RotateCcw } from 'lucide-react';
 import Footer from '../components/layout/Footer';
-import { tracker } from '../utils/tracker';
 import { AuthContext } from '../context/AuthContext';
+import axios from 'axios';
+
+const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001') + '/api/queue';
 
 export default function Queue() {
   const [queues, setQueues] = useState([]);
+  const [loading, setLoading] = useState(true);
   const { user } = useContext(AuthContext);
   const isAdmin = user && user.role === 'ADMIN';
 
-  useEffect(() => {
-    // Load initial jobs from tracker
-    const jobs = tracker.getPrintJobs();
-    if (jobs.length > 0) {
-      // Map to expected format
-      const formatted = jobs.map(j => ({
-        id: j.id,
-        initialTime: j.estimatedSeconds || 3600, // mock default
-        timeRemaining: j.estimatedSeconds || 3600,
-        isPrinting: j.status === 'PRINTING',
-        originalJob: j
-      }));
-      setQueues(formatted);
-    } else {
-      // Default mock if none
-      setQueues([
-        { id: 'Q-001', initialTime: 38420, timeRemaining: 38420, isPrinting: true },
-        { id: 'Q-002', initialTime: 86450, timeRemaining: 86450, isPrinting: false },
-        { id: 'Q-003', initialTime: 365, timeRemaining: 365, isPrinting: false },
-      ]);
-    }
-
-    const queueInterval = setInterval(() => {
-      setQueues(prev => {
-        if (prev.length === 0) return prev;
-
-        const newQueues = [...prev];
-        const printingIndex = newQueues.findIndex(q => q.isPrinting);
-
-        if (printingIndex !== -1) {
-          const currentJob = newQueues[printingIndex];
-          if (currentJob.timeRemaining > 0) {
-            currentJob.timeRemaining -= 1;
-          } else {
-            if (currentJob.originalJob) {
-              tracker.updatePrintJobStatus(currentJob.id, 'DONE');
-            }
-            newQueues.splice(printingIndex, 1);
-          }
+  const fetchQueue = async () => {
+    try {
+      const res = await axios.get(API_BASE_URL);
+      // Map and calculate initial timeRemaining
+      const now = new Date().getTime();
+      const updated = res.data.map(q => {
+        let timeRemaining = q.estimatedSeconds;
+        if (q.status === 'PRINTING' && q.startTime) {
+          const elapsed = Math.floor((now - new Date(q.startTime).getTime()) / 1000);
+          timeRemaining = Math.max(0, q.estimatedSeconds - elapsed);
         }
-        return newQueues;
+        return { ...q, timeRemaining };
+      });
+      setQueues(updated);
+    } catch (error) {
+      console.error('Error fetching queue:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchQueue();
+
+    const timer = setInterval(() => {
+      setQueues(prev => {
+        const next = prev.map(q => {
+          if (q.status === 'PRINTING' && q.timeRemaining > 0) {
+            const newTime = q.timeRemaining - 1;
+            // If just finished, we can trigger completion or just wait for next fetch
+            if (newTime === 0) {
+              handleAutoComplete(q.id);
+            }
+            return { ...q, timeRemaining: newTime };
+          }
+          return q;
+        });
+        return next;
       });
     }, 1000);
 
-    return () => clearInterval(queueInterval);
+    return () => clearInterval(timer);
   }, []);
+
+  const handleAutoComplete = async (id) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.patch(`${API_BASE_URL}/${id}/complete`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      // Optionally re-fetch
+    } catch (err) {
+      console.error('Error completing job:', err);
+    }
+  };
 
   const formatTime = (seconds) => {
     const d = Math.floor(seconds / 86400);
     const h = Math.floor((seconds % 86400) / 3600);
     const m = Math.floor((seconds % 3600) / 60);
-    const s = seconds % 60;
+    const s = Math.floor(seconds % 60);
     if (d > 0) return `${d}d ${h}h ${m}m ${s}s`;
     return `${h}h ${m}m ${s}s`;
   };
 
-  const handleConfirmPrint = (index) => {
-    setQueues(prev => {
-      const newQ = [...prev];
-      newQ[index].isPrinting = true;
-      if (newQ[index].originalJob) {
-        tracker.updatePrintJobStatus(newQ[index].id, 'PRINTING');
-      }
-      return newQ;
-    });
+  const handleConfirmPrint = async (id) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.patch(`${API_BASE_URL}/${id}/start`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchQueue();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Error starting print');
+    }
   };
 
-  const handleCancelPrint = (index) => {
-    setQueues(prev => {
-      const newQ = [...prev];
-      newQ[index].isPrinting = false;
-      newQ[index].timeRemaining = newQ[index].initialTime;
-      if (newQ[index].originalJob) {
-        tracker.updatePrintJobStatus(newQ[index].id, 'WAIT FOR PRINT');
-      }
-      return newQ;
-    });
+  const handleCancelPrint = async (id) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.patch(`${API_BASE_URL}/${id}/reset`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchQueue();
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const handleDeleteQueue = (index) => {
-    setQueues(prev => {
-      const newQ = [...prev];
-      const job = newQ[index];
-      if (job.originalJob) {
-        tracker.deletePrintJob(job.id);
-      }
-      newQ.splice(index, 1);
-      return newQ;
-    });
+  const handleDeleteQueue = async (id) => {
+    if (!window.confirm('ยืนยันการลบคิวนี้?')) return;
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`${API_BASE_URL}/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchQueue();
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const [newQOrderId, setNewQOrderId] = useState('');
@@ -106,7 +120,7 @@ export default function Queue() {
   const [newQMins, setNewQMins] = useState('');
   const [newQSecs, setNewQSecs] = useState('');
 
-  const handleAddQueue = (e) => {
+  const handleAddQueue = async (e) => {
     e.preventDefault();
     const d = Math.max(0, parseInt(newQDays) || 0);
     const h = Math.min(24, Math.max(0, parseInt(newQHours) || 0));
@@ -116,27 +130,24 @@ export default function Queue() {
     const totalSeconds = (d * 86400) + (h * 3600) + (m * 60) + s;
     if (totalSeconds <= 0) return;
 
-    const newJob = tracker.createPrintJob({
-      estimatedSeconds: totalSeconds,
-      source: 'manual'
-    });
-
-    setQueues(prev => [
-      ...prev,
-      {
-        id: newJob.id,
-        orderId: newQOrderId || '-',
-        initialTime: totalSeconds,
-        timeRemaining: totalSeconds,
-        isPrinting: false,
-        originalJob: newJob
-      }
-    ]);
-    setNewQOrderId('');
-    setNewQDays('');
-    setNewQHours('');
-    setNewQMins('');
-    setNewQSecs('');
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(API_BASE_URL, {
+        orderId: newQOrderId,
+        estimatedSeconds: totalSeconds
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      setNewQOrderId('');
+      setNewQDays('');
+      setNewQHours('');
+      setNewQMins('');
+      setNewQSecs('');
+      fetchQueue();
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
@@ -181,19 +192,20 @@ export default function Queue() {
                 </tr>
               </thead>
               <tbody>
-                {queues.length === 0 ? (
+                {loading ? (
+                  <tr><td colSpan={isAdmin ? "5" : "4"} className="p-8 text-center text-gray-400">กำลังโหลด...</td></tr>
+                ) : queues.length === 0 ? (
                   <tr><td colSpan={isAdmin ? "5" : "4"} className="p-8 text-center text-gray-400">ตอนนี้ไม่มีคิวงาน ว่างพิมพ์ได้ทันที!</td></tr>
                 ) : (
                   queues.map((q, index) => {
-                    const currentStatus = q.isPrinting ? 'PRINTING' : 'WAIT FOR PRINT';
                     return (
                       <tr key={q.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors text-center text-sm md:text-base">
                         <td className="p-4 md:p-5 font-bold text-gray-500 text-lg">{index + 1}</td>
                         <td className="p-4 md:p-5 font-medium text-gray-800">{q.orderId || '-'}</td>
                         <td className="p-4 md:p-5">
-                          <span className={`inline-flex items-center justify-center gap-1.5 px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs font-bold ${q.isPrinting ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`}>
-                            {q.isPrinting && <Loader size={14} className="animate-spin" />}
-                            {currentStatus}
+                          <span className={`inline-flex items-center justify-center gap-1.5 px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs font-bold ${q.status === 'PRINTING' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`}>
+                            {q.status === 'PRINTING' && <Loader size={14} className="animate-spin" />}
+                            {q.status}
                           </span>
                         </td>
                         <td className="p-4 md:p-5 font-mono text-lg md:text-xl font-bold text-gray-700">
@@ -201,14 +213,20 @@ export default function Queue() {
                         </td>
                         {isAdmin && (
                           <td className="p-4 md:p-5 flex flex-col sm:flex-row gap-2 justify-center items-center">
-                            {q.isPrinting ? (
-                              <button onClick={() => handleCancelPrint(index)} className="bg-red-100 text-red-600 hover:bg-red-200 px-3 py-1.5 rounded-lg text-xs md:text-sm font-bold transition whitespace-nowrap">ยกเลิก / รีเซ็ต</button>
+                            {q.status === 'PRINTING' ? (
+                              <button onClick={() => handleCancelPrint(q.id)} className="bg-red-100 text-red-600 hover:bg-red-200 px-3 py-1.5 rounded-lg text-xs md:text-sm font-bold transition flex items-center gap-1">
+                                <RotateCcw size={14} /> รีเซ็ต
+                              </button>
                             ) : (
                               <>
-                                {index === 0 && !queues.some(item => item.isPrinting) && (
-                                  <button onClick={() => handleConfirmPrint(index)} className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs md:text-sm font-bold transition whitespace-nowrap">Confirm Print</button>
+                                {index === 0 && !queues.some(item => item.status === 'PRINTING') && (
+                                  <button onClick={() => handleConfirmPrint(q.id)} className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs md:text-sm font-bold transition flex items-center gap-1">
+                                    <Play size={14} /> เริ่มพิมพ์
+                                  </button>
                                 )}
-                                <button onClick={() => handleDeleteQueue(index)} className="bg-gray-100 text-gray-600 hover:bg-red-100 hover:text-red-600 px-3 py-1.5 rounded-lg text-xs md:text-sm font-bold transition whitespace-nowrap">ลบคิว</button>
+                                <button onClick={() => handleDeleteQueue(q.id)} className="bg-gray-100 text-gray-600 hover:bg-red-100 hover:text-red-600 px-3 py-1.5 rounded-lg text-xs md:text-sm font-bold transition flex items-center gap-1">
+                                  <Trash2 size={14} /> ลบ
+                                </button>
                               </>
                             )}
                           </td>

@@ -42,3 +42,13 @@ model PageVisit {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model QueueItem {
+  id               Int       @id @default(autoincrement())
+  orderId          String
+  estimatedSeconds Int
+  startTime        DateTime?
+  status           String    @default("WAIT FOR PRINT") // "WAIT FOR PRINT", "PRINTING", "DONE"
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}

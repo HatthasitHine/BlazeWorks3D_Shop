@@ -5,6 +5,7 @@ import authRoutes from './routes/auth.routes.js';
 
 import portfolioRoutes from './routes/portfolio.routes.js';
 import analyticsRoutes from './routes/analytics.routes.js';
+import queueRoutes from './routes/queue.routes.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -27,6 +28,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', authRoutes);
 app.use('/api/portfolio', portfolioRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/queue', queueRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
