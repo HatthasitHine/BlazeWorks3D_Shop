@@ -41,9 +41,9 @@ export default function Queue() {
         const next = prev.map(q => {
           if (q.status === 'PRINTING' && q.timeRemaining > 0) {
             const newTime = q.timeRemaining - 1;
-            // If just finished, we can trigger completion or just wait for next fetch
             if (newTime === 0) {
               handleAutoComplete(q.id);
+              return { ...q, timeRemaining: newTime, status: 'DONE' };
             }
             return { ...q, timeRemaining: newTime };
           }
@@ -203,9 +203,12 @@ export default function Queue() {
                         <td className="p-4 md:p-5 font-bold text-gray-500 text-lg">{index + 1}</td>
                         <td className="p-4 md:p-5 font-medium text-gray-800">{q.orderId || '-'}</td>
                         <td className="p-4 md:p-5">
-                          <span className={`inline-flex items-center justify-center gap-1.5 px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs font-bold ${q.status === 'PRINTING' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`}>
+                          <span className={`inline-flex items-center justify-center gap-1.5 px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs font-bold ${
+                            q.status === 'PRINTING' ? 'bg-blue-100 text-blue-700' :
+                            q.status === 'DONE' ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-100 text-orange-700'
+                          }`}>
                             {q.status === 'PRINTING' && <Loader size={14} className="animate-spin" />}
-                            {q.status}
+                            {q.status === 'DONE' ? 'Complete' : q.status}
                           </span>
                         </td>
                         <td className="p-4 md:p-5 font-mono text-lg md:text-xl font-bold text-gray-700">
@@ -217,9 +220,13 @@ export default function Queue() {
                               <button onClick={() => handleCancelPrint(q.id)} className="bg-red-100 text-red-600 hover:bg-red-200 px-3 py-1.5 rounded-lg text-xs md:text-sm font-bold transition flex items-center gap-1">
                                 <RotateCcw size={14} /> รีเซ็ต
                               </button>
+                            ) : q.status === 'DONE' ? (
+                              <button onClick={() => handleDeleteQueue(q.id)} className="bg-gray-100 text-gray-600 hover:bg-red-100 hover:text-red-600 px-3 py-1.5 rounded-lg text-xs md:text-sm font-bold transition flex items-center gap-1">
+                                <Trash2 size={14} /> ลบประวัติ
+                              </button>
                             ) : (
                               <>
-                                {index === 0 && !queues.some(item => item.status === 'PRINTING') && (
+                                {!queues.some(item => item.status === 'PRINTING') && (
                                   <button onClick={() => handleConfirmPrint(q.id)} className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs md:text-sm font-bold transition flex items-center gap-1">
                                     <Play size={14} /> เริ่มพิมพ์
                                   </button>

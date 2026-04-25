@@ -150,7 +150,7 @@ export default function Portfolio() {
                                 {/* Image Top */}
                                 <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100">
                                     <img
-                                        src={item.imageUrl?.startsWith('http') ? item.imageUrl : `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}${item.imageUrl}`}
+                                        src={item.imageUrl || ''}
                                         alt={item.partName}
                                         loading="lazy"
                                         className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-105"

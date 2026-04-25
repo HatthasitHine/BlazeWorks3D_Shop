@@ -15,15 +15,19 @@ export const getPortfolioItems = async (req, res) => {
   }
 };
 
+// Helper: convert uploaded file buffer to Base64 data URL
+const toBase64 = (file) => {
+  if (!file) return null;
+  const base64 = file.buffer.toString('base64');
+  return `data:${file.mimetype};base64,${base64}`;
+};
+
 // Create a new portfolio item
 export const createPortfolioItem = async (req, res) => {
   try {
     const { partName, printTime, price, material } = req.body;
-    let imageUrl = '';
 
-    if (req.file) {
-      imageUrl = `/uploads/${req.file.filename}`;
-    }
+    const imageUrl = toBase64(req.file) || '';
 
     const newItem = await prisma.portfolioItem.create({
       data: {
@@ -47,17 +51,17 @@ export const updatePortfolioItem = async (req, res) => {
   try {
     const { id } = req.params;
     const { partName, printTime, price, material } = req.body;
-    
-    // Check if new image was uploaded
-    let updateData = {
+
+    const updateData = {
       partName,
       material: material || '',
       printTime,
       price
     };
 
+    // Only update image if a new file was uploaded
     if (req.file) {
-      updateData.imageUrl = `/uploads/${req.file.filename}`;
+      updateData.imageUrl = toBase64(req.file);
     }
 
     const updatedItem = await prisma.portfolioItem.update({

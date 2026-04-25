@@ -5,11 +5,6 @@ const prisma = new PrismaClient();
 export const getQueue = async (req, res) => {
   try {
     const queue = await prisma.queueItem.findMany({
-      where: {
-        status: {
-          in: ['WAIT FOR PRINT', 'PRINTING']
-        }
-      },
       orderBy: {
         createdAt: 'asc'
       }
