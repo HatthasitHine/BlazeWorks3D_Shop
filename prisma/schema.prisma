@@ -47,8 +47,9 @@ model QueueItem {
   id               Int       @id @default(autoincrement())
   orderId          String
   estimatedSeconds Int
+  elapsedSeconds   Int       @default(0)
   startTime        DateTime?
-  status           String    @default("WAIT FOR PRINT") // "WAIT FOR PRINT", "PRINTING", "DONE"
+  status           String    @default("WAIT FOR PRINT") // "WAIT FOR PRINT", "PRINTING", "PAUSED", "DONE"
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 }
