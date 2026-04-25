@@ -4,9 +4,33 @@ import { Clock, Tag, Plus, X, Edit, Trash2, Box } from 'lucide-react';
 import Footer from '../components/layout/Footer';
 import { AuthContext } from '../context/AuthContext';
 
+// Skeleton shimmer card
+const SkeletonCard = () => (
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100/80 overflow-hidden flex flex-col">
+        <div className="relative aspect-[4/3] w-full bg-gray-200 overflow-hidden">
+            <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200" />
+        </div>
+        <div className="p-5 flex-1 flex flex-col gap-3">
+            <div className="h-5 bg-gray-200 rounded-lg w-3/4 overflow-hidden relative">
+                <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200" />
+            </div>
+            <div className="h-5 bg-gray-200 rounded-lg w-1/2 overflow-hidden relative">
+                <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200" />
+            </div>
+            <div className="h-8 bg-gray-100 rounded-lg w-full mt-auto overflow-hidden relative">
+                <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-gray-100 via-white to-gray-100" />
+            </div>
+            <div className="h-8 bg-gray-100 rounded-lg w-full overflow-hidden relative">
+                <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-gray-100 via-white to-gray-100" />
+            </div>
+        </div>
+    </div>
+);
+
 export default function Portfolio() {
     const { user } = useContext(AuthContext);
     const [items, setItems] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const fileInputRef = useRef(null);
@@ -25,11 +49,14 @@ export default function Portfolio() {
     }, []);
 
     const fetchItems = async () => {
+        setIsLoading(true);
         try {
             const res = await axios.get((import.meta.env.VITE_API_URL || 'http://localhost:3001') + '/api/portfolio');
             setItems(res.data);
         } catch (error) {
             console.error('Error fetching portfolio items', error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -129,6 +156,11 @@ export default function Portfolio() {
                     </div>
 
                     {/* Portfolio Grid Layout */}
+                    {isLoading ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+                            {Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)}
+                        </div>
+                    ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
                         {items.map((item) => (
                             <div
@@ -185,10 +217,11 @@ export default function Portfolio() {
                             </div>
                         ))}
                     </div>
+                    )}
 
-                    {items.length === 0 && (
+                    {!isLoading && items.length === 0 && (
                         <div className="text-center py-20 text-gray-500">
-                            ไม่มีข้อมูลผลงาน
+                            ยังไม่มีข้อมูลผลงาน
                         </div>
                     )}
 
