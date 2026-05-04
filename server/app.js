@@ -30,9 +30,18 @@ app.use('/api/portfolio', portfolioRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/queue', queueRoutes);
 
-// Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'API is running' });
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
+
+// Health check with DB touch
+app.get('/api/health', async (req, res) => {
+  try {
+    // Simple query to keep DB active
+    await prisma.user.count(); 
+    res.json({ status: 'ok', message: 'API and Database are active' });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: error.message });
+  }
 });
 
 app.listen(PORT, () => {
