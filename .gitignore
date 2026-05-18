@@ -26,6 +26,7 @@ dist-ssr
 /src/generated/prisma
 .env
 .env.*
+!.env.example
 server/uploads/
 *.db
 *.sqlite
